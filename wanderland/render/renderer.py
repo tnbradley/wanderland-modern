@@ -159,6 +159,10 @@ class Renderer:
         if start:
             self.screen.blit(start, (start_x, 200))
         
+        # Draw a red box as fallback click target if no font
+        if not start:
+            pygame.draw.rect(self.screen, (200, 0, 0), (CONFIG.width//2 - 80, 200, 160, 40), 2)
+        
         pygame.display.flip()
         
         for event in pygame.event.get():
@@ -171,12 +175,18 @@ class Renderer:
                     start_rect = start.get_rect(topleft=(start_x, 200))
                     if start_rect.collidepoint(mx, my):
                         return True
+                else:
+                    # Fallback: click anywhere in center
+                    if CONFIG.width//2 - 80 < mx < CONFIG.width//2 + 80 and 200 < my < 240:
+                        return True
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     exit()
                 elif event.key == pygame.K_F11:
                     self._toggle_fullscreen()
+                elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                    return True
         
         return False
     
