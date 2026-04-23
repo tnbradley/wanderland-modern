@@ -17,7 +17,10 @@ class GameState:
     """Main game state manager."""
     
     def __init__(self) -> None:
-        pygame.mixer.pre_init(44100, 16, 2, 4096)
+        try:
+            pygame.mixer.pre_init(44100, 16, 2, 4096)
+        except (NotImplementedError, AttributeError):
+            pass
         pygame.init()
         
         self.screen = pygame.display.set_mode((CONFIG.width, CONFIG.height), pygame.DOUBLEBUF)
@@ -70,9 +73,10 @@ class GameState:
         
         # Play placeholder audio
         try:
-            pygame.mixer.music.load("assets/audio/placeholder.wav")
-            pygame.mixer.music.play()
-        except pygame.error:
+            if hasattr(pygame, 'mixer') and hasattr(pygame.mixer, 'music'):
+                pygame.mixer.music.load("assets/audio/placeholder.wav")
+                pygame.mixer.music.play()
+        except (pygame.error, AttributeError, NotImplementedError):
             pass
     
     def _game_loop(self) -> None:

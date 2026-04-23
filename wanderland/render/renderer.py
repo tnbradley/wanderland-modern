@@ -19,9 +19,14 @@ class Renderer:
         self.local_tiles = assets.load_local_tiles()
         self.ui = assets.load_ui()
         self.player_sprites = assets.load_player_sprites()
-        self.font_large = pygame.font.SysFont("Plantin", 90)
-        self.font_medium = pygame.font.SysFont("Plantin", 40)
-        self.font_small = pygame.font.SysFont("Plantin", 20)
+        try:
+            self.font_large = pygame.font.SysFont("Plantin", 90)
+            self.font_medium = pygame.font.SysFont("Plantin", 40)
+            self.font_small = pygame.font.SysFont("Plantin", 20)
+        except (NotImplementedError, ImportError):
+            self.font_large = None
+            self.font_medium = None
+            self.font_small = None
     
     def clear(self, color: Tuple[int, int, int] = (0, 0, 0)) -> None:
         self.screen.fill(color)
@@ -143,14 +148,16 @@ class Renderer:
         else:
             self.screen.fill((0, 0, 0))
         
-        title = self.font_large.render("Wanderland", True, (255, 0, 0))
-        start = self.font_medium.render("New Game", True, (255, 0, 0))
+        title = self.font_large.render("Wanderland", True, (255, 0, 0)) if self.font_large else None
+        start = self.font_medium.render("New Game", True, (255, 0, 0)) if self.font_medium else None
         
-        title_x = CONFIG.width // 2 - title.get_width() // 2
-        start_x = CONFIG.width // 2 - start.get_width() // 2
+        title_x = CONFIG.width // 2 - (title.get_width() // 2 if title else 100)
+        start_x = CONFIG.width // 2 - (start.get_width() // 2 if start else 80)
         
-        self.screen.blit(title, (title_x, 100))
-        self.screen.blit(start, (start_x, 200))
+        if title:
+            self.screen.blit(title, (title_x, 100))
+        if start:
+            self.screen.blit(start, (start_x, 200))
         
         pygame.display.flip()
         
@@ -160,9 +167,10 @@ class Renderer:
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = pygame.mouse.get_pos()
-                start_rect = start.get_rect(topleft=(start_x, 200))
-                if start_rect.collidepoint(mx, my):
-                    return True
+                if start:
+                    start_rect = start.get_rect(topleft=(start_x, 200))
+                    if start_rect.collidepoint(mx, my):
+                        return True
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
@@ -180,8 +188,9 @@ class Renderer:
         else:
             self.screen.fill((0, 0, 0))
         
-        label = self.font_medium.render(text, True, (255, 0, 0))
-        self.screen.blit(label, (CONFIG.width // 2 - label.get_width() // 2, 100))
+        if self.font_medium:
+            label = self.font_medium.render(text, True, (255, 0, 0))
+            self.screen.blit(label, (CONFIG.width // 2 - label.get_width() // 2, 100))
         pygame.display.flip()
     
     def _toggle_fullscreen(self) -> None:

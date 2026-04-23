@@ -34,7 +34,9 @@ class WorldGenerator:
     
     def generate(self) -> None:
         """Generate the world map."""
-        self._generate_voronoi()
+        voronoi_path = Path("assets/voronoi_map.png")
+        if not voronoi_path.exists():
+            self._generate_voronoi()
         self._process_map()
         self._create_blocks()
         self.chunks = self._create_chunks()
@@ -66,8 +68,8 @@ class WorldGenerator:
                     water_set = self._check_water_edge(px, x, y, width, height)
                     
                     if self.simplex:
-                        value = self.simplex.noise2d(x / 6, y / 6)
-                        shore_value = self.simplex.noise2d(x / 8, y / 8)
+                        value = self.simplex.noise2(x / 6, y / 6)
+                        shore_value = self.simplex.noise2(x / 8, y / 8)
                     else:
                         value = random.uniform(-1, 1)
                         shore_value = random.uniform(-1, 1)
